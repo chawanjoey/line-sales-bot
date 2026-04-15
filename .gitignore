@@ -1,0 +1,16 @@
+# Environment variables (sensitive!)
+.env
+
+# SQLite database (local chat history)
+data/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
