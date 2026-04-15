@@ -18,21 +18,20 @@ const lineClient = new line.messagingApi.MessagingApiClient({
 });
 
 // ─── Loading Animation ────────────────────────────────────────────────────────
+// ใช้ SDK method แทน raw fetch — รองรับทุก Node.js version และ auth ถูกต้องเสมอ
 
 async function showLoading(userId, seconds = 20) {
+  // loadingSeconds ต้องเป็น multiple of 5 ระหว่าง 5-60
+  const validSeconds = Math.min(60, Math.max(5, Math.round(seconds / 5) * 5));
   try {
-    const res = await fetch('https://api.line.me/v2/bot/chat/loading/start', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify({ chatId: userId, loadingSeconds: seconds }),
+    await lineClient.showLoadingAnimation({
+      chatId: userId,
+      loadingSeconds: validSeconds,
     });
-    const body = await res.text();
-    console.log(`⏳ Loading → ${res.status}: ${body}`);
+    console.log(`⏳ Loading started (${validSeconds}s) for ${userId.slice(0, 8)}...`);
   } catch (e) {
-    console.error('Loading error:', e.message);
+    // ไม่ interrupt flow ถ้า loading ล้มเหลว แค่ log error
+    console.error(`⚠️ Loading error [${e?.status || e?.message}]:`, e?.body || e?.message || e);
   }
 }
 
@@ -131,6 +130,8 @@ async function handleEvent(event) {
     // รอรับ Employee Code
     const lastMsg = history[history.length - 1];
     if (lastMsg?.content === '__ASKING_CODE__') {
+      // แสดง loading ขณะ query database
+      showLoading(userId, 10);
       const code = userText.toUpperCase().trim();
       const emp = await findByEmployeeCode(code);
 
