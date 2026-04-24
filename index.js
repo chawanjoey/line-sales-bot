@@ -57,8 +57,104 @@ app.post('/webhook', (req, res) => {
   } catch (e) { console.error('Parse error:', e.message); }
 });
 
-// ── Health ────────────────────────────────────────────────────────────────────
-app.get('/', (req, res) => res.json({ status: '🚀 Sales Bot running', port: PORT }));
+// ── Health (JSON for monitoring) ─────────────────────────────────────────────
+app.get('/health', (req, res) => res.json({ status: '🚀 Sales Bot running', port: PORT, uptime: process.uptime() }));
+
+// ── Landing page (root) ──────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="th"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SSC LINE Sales Coach AI Bot</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,'Segoe UI','Sukhumvit Set',sans-serif;background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:rgba(30,41,59,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:40px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .logo{font-size:64px;text-align:center;margin-bottom:8px}
+  h1{font-size:28px;text-align:center;background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;margin-bottom:6px}
+  .sub{text-align:center;color:#94a3b8;font-size:13px;margin-bottom:28px}
+  .status{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);border-radius:30px;color:#86efac;font-size:13px;font-weight:600;width:fit-content;margin:0 auto 28px}
+  .status .dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.2)}}
+  .features{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+  .feat{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:14px}
+  .feat .ico{font-size:20px;margin-bottom:6px}
+  .feat .ttl{font-size:12px;font-weight:700;color:#cbd5e1}
+  .feat .dsc{font-size:10px;color:#64748b;margin-top:2px;line-height:1.4}
+  .actions{display:flex;flex-direction:column;gap:10px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:10px;font-weight:600;text-decoration:none;font-size:14px;transition:.15s;cursor:pointer;border:none}
+  .btn-primary{background:linear-gradient(135deg,#4f46e5,#6366f1);color:white}
+  .btn-primary:hover{background:linear-gradient(135deg,#4338ca,#4f46e5);transform:translateY(-1px)}
+  .btn-secondary{background:rgba(255,255,255,.05);color:#cbd5e1;border:1px solid rgba(255,255,255,.1)}
+  .btn-secondary:hover{background:rgba(255,255,255,.1)}
+  .footer{text-align:center;font-size:11px;color:#475569;margin-top:24px;line-height:1.6}
+  .footer code{background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;font-size:10px;color:#94a3b8}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:24px;max-width:420px;width:100%}
+  .modal h3{margin-bottom:8px;font-size:18px}
+  .modal p{color:#94a3b8;font-size:12px;margin-bottom:14px}
+  .modal input{width:100%;padding:12px 14px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:14px;outline:none}
+  .modal input:focus{border-color:#6366f1}
+  .modal-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+  .modal-actions button{padding:9px 16px;border-radius:6px;border:none;font-size:13px;cursor:pointer;font-weight:600}
+  .modal .cancel{background:transparent;color:#94a3b8;border:1px solid #334155}
+  .modal .ok{background:#4f46e5;color:white}
+</style>
+</head><body>
+  <div class="card">
+    <div class="logo">🎯</div>
+    <h1>SSC LINE Sales Coach</h1>
+    <p class="sub">AI Sales Coaching Bot for Smart Solution Computer</p>
+    <div class="status"><span class="dot"></span>System Online</div>
+
+    <div class="features">
+      <div class="feat"><div class="ico">📊</div><div class="ttl">Daily KPI</div><div class="dsc">ติดตาม performance รายวัน</div></div>
+      <div class="feat"><div class="ico">🤖</div><div class="ttl">AI Coaching</div><div class="dsc">คำแนะนำส่วนตัวจาก AI</div></div>
+      <div class="feat"><div class="ico">💬</div><div class="ttl">LINE Native</div><div class="dsc">ใช้งานผ่าน LINE OA</div></div>
+      <div class="feat"><div class="ico">🏆</div><div class="ttl">Leaderboard</div><div class="dsc">เปรียบเทียบทีม</div></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="askToken()">🔐 Admin Dashboard</button>
+      <a class="btn btn-secondary" href="/health">📡 System Status</a>
+    </div>
+
+    <div class="footer">
+      Smart Solution Computer Co., Ltd.<br>
+      <code>v1.0 · Port ${PORT}</code>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <h3>🔐 Admin Access</h3>
+      <p>กรุณาใส่ admin token เพื่อเข้าถึง dashboard</p>
+      <input type="password" id="tk" placeholder="Token..." autofocus>
+      <div class="modal-actions">
+        <button class="cancel" onclick="document.getElementById('modal').classList.remove('show')">ยกเลิก</button>
+        <button class="ok" onclick="goAdmin()">เข้าระบบ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function askToken(){
+      const saved = localStorage.getItem('sb_admin_token');
+      if(saved){ location.href='/admin?token='+encodeURIComponent(saved); return; }
+      document.getElementById('modal').classList.add('show');
+    }
+    function goAdmin(){
+      const t = document.getElementById('tk').value.trim();
+      if(!t) return;
+      localStorage.setItem('sb_admin_token', t);
+      location.href='/admin?token='+encodeURIComponent(t);
+    }
+    document.getElementById('tk').addEventListener('keydown', e => { if(e.key==='Enter') goAdmin(); });
+    document.getElementById('modal').addEventListener('click', e => { if(e.target.id==='modal') document.getElementById('modal').classList.remove('show'); });
+  </script>
+</body></html>`);
+});
 
 // ── Admin API: ดูพนักงานทั้งหมด ───────────────────────────────────────────────
 app.get('/admin/api/employees', adminAuth, async (req, res) => {
